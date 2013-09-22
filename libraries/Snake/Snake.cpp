@@ -31,22 +31,21 @@
 #include <string.h>
 #include <Arduino.h>
 
-Snake::Snake(byte max_x, byte max_y, byte *framebuffer, short fb_size)
+Snake::Snake(byte max_x, byte max_y, set_xy_fuct set_xy)
 {
   _max_x = max_x;
   _max_y = max_y;
+  _set_xy = set_xy;
 
   // Start with the snake in the middle
   _head_x = max_x/2;
   _head_y = max_y/2;
-  _fb = framebuffer;
 
   _dir = EAST;
 
   memset(_ele, 0, SNAKE_ARRAY_SIZE);
   _snake_len = 1; // Initial snake length
   _game_over = false;
-  _fb_size = fb_size;
   _food_x = 0;
   _food_y = 0;
   _food_timer = 0;
@@ -185,30 +184,27 @@ void Snake::render()
   byte y = _head_y;
   byte dir;
 
-  // Wipe framebuffer
-  memset(_fb, (_game_over ? 0xff : 0x00), _fb_size);
+  // Draw head
+  set_xy(x, y, 1);
 
- // Draw head
- set_xy(x, y, 1);
-
- // Draw body
- for (int i=0; i < _snake_len; i++)
+  // Draw body
+  for (int i=0; i < _snake_len; i++)
  {
-   dir = ~(get_element(i)) & 3;
+    dir = ~(get_element(i)) & 3;
 
-   next_pos((direction)dir, &x, &y);
-   set_xy(x, y, 1);
- }
+    next_pos((direction)dir, &x, &y);
+    set_xy(x, y, 1);
+  }
 
  // Draw border
- line_h(0       , 0, _max_x-1);
- line_h(_max_y-1, 0, _max_x-1);
- line_v(0       , 0, _max_y-1);
- line_v(_max_x-1, 0, _max_y-1);
+  line_h(0       , 0, _max_x-1);
+  line_h(_max_y-1, 0, _max_x-1);
+  line_v(0       , 0, _max_y-1);
+  line_v(_max_x-1, 0, _max_y-1);
  
- // Draw food
- if (_food_x > 0 && _food_y > 0)
-   set_xy(_food_x, _food_y, 1); 
+  // Draw food
+  if (_food_x > 0 && _food_y > 0)
+    set_xy(_food_x, _food_y, 1); 
 }
 
 void Snake::line_h(byte y, byte start_x, byte end_x)
@@ -224,17 +220,9 @@ void Snake::line_v(byte x, byte start_y, byte end_y)
 }
 
 void Snake::set_xy(byte x, byte y, byte val)
-// set/clear position x,y in the framebuffer 
+// Call the set_xy function that was passed in when constructed 
 {
-  if (_game_over)
-    val = !val;
-
-  byte *a=  &_fb[((x/8)*_max_y) + y];
-
-  if (val)
-    *a |= (1 << x%8);
-  else
-    *a &= ~(1 << x%8);
+  _set_xy(x, y, val);
 }
 
 byte Snake::get_element(short n)

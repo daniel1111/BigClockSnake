@@ -1,32 +1,27 @@
 #include <Snake.h>
 
-/* Snake example. Ouputs an 16x8 snake game over serial. Up/Down/Left/Right is W/S/A/D, to restart, reset the Arduino.
+/* Snake example. Ouputs an 8x8 snake game over serial. Up/Down/Left/Right is W/S/A/D, to restart, reset the Arduino.
  * Works best from gtkterm (Linux) and presumably hyperterminal (Windows). Still not particulary playable though as this
  * is really meant for matrix displays.  
  */
- 
-/*
- * Set array size to hold screen state. As 1 bit, not 1 byte, is stored per pixel, MAX_X is the width of the display divided by 8. 
- * MAX_Y is the height.
- * 
- * Generate a 16x8 game:
- */ 
-#define MAX_X 2
-#define MAX_Y 8
+
+#define MAX_X 16
+#define MAX_Y 16
 
 byte _framebuf[MAX_X][MAX_Y]; 
 Snake *_sn;
 
 void setup()
 {
-  _sn = new Snake(MAX_X*8, MAX_Y, &_framebuf[0][0], sizeof(_framebuf));
+  _sn = new Snake(MAX_X, MAX_Y, set_xy);
   Serial.begin(9600);
 }
 
 void loop()
 {
+  memset(_framebuf, 0, sizeof(_framebuf)); // wipe buffer
   _sn->tick();    // advance game state
-  _sn->render();  // write to _framebuf
+  _sn->render();  // call set_xy function to draw 
   output();       // output _framebuf over serial
   delay(1000);
   
@@ -59,14 +54,20 @@ void loop()
   }
 }
 
-void output()
+/* Used by Snake class when render() called */
+void set_xy(byte x, byte y, byte val)
 {
+  _framebuf[x][y] = val;
+}
+
+void output()
+{  
   /* Output game image from _framebuf over serial. */
   for (int y=0; y < MAX_Y; y++)
   {
-    for (int x=0; x < MAX_X*8; x++)
+    for (int x=0; x < MAX_X; x++)
     {
-      if ((_framebuf[x/8][y]) & ( 1 << (x%8))) 
+      if (_framebuf[x][y])
         Serial.print("X");
       else
         Serial.print("-");

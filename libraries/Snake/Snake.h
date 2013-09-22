@@ -28,6 +28,7 @@
  */
 
 typedef unsigned char byte;
+typedef void (*set_xy_fuct)(byte,byte,byte);
 
 #define SNAKE_ARRAY_SIZE 200 // Snake length can at most be 1+ 4x this value
 #define FOOD_TIMEOUT 50      // How long to show food for
@@ -35,7 +36,7 @@ typedef unsigned char byte;
 class Snake
 {
   public:
-    Snake(byte max_x, byte max_y, byte *framebuffer, short _fb_size);
+    Snake(byte max_x, byte max_y, set_xy_fuct set_xy);
     void dir_up()     { set_dir(NORTH); };
     void dir_down()   { set_dir(SOUTH); };
     void dir_left()   { set_dir(WEST);  }; 
@@ -55,13 +56,13 @@ class Snake
     byte _head_x;
     byte _head_y;
     direction _dir;
-    short _fb_size;
     short _snake_len;
     byte _ele[SNAKE_ARRAY_SIZE]; // snake - 2bits per element (not including head)
-    byte *_fb;
     bool _game_over;
+  //  void (*_set_xy)(byte x, byte y, byte val, byte invert);
 
     void set_xy(byte x, byte y, byte val);
+    set_xy_fuct _set_xy;
     void next_pos(direction dir, byte *x, byte *y);
     void mov(direction mov_dir, byte con_sid, direction *new_dir, byte *new_sid);
     void line_h(byte y, byte start_x, byte end_x);

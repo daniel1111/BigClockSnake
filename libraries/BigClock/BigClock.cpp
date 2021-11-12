@@ -31,8 +31,8 @@
 
 #include "Arduino.h"
 #include "BigClock.h"
-#include "../SPI/SPI.h"
-#include "../Timer1/TimerOne.h"
+#include "SPI.h"
+#include "TimerOne.h"
 
 static BigClock *bc;
     

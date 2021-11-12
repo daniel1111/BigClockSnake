@@ -5,8 +5,8 @@
 #define BigClock_h
 
 #include "Arduino.h"
-#include "../SPI/SPI.h"
-#include "../Timer1/TimerOne.h"
+#include "SPI.h"
+#include "TimerOne.h"
 #include <avr/pgmspace.h>
 
 #define MAX_X 12
